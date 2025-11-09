@@ -1,0 +1,36 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin SDK bypasses these rules (has admin credentials)
+    // All operations with admin SDK work regardless of these rules
+    
+    // Helper function to check ownership
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can manage their own profile data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Secure Vault - Users can manage their own vault items
+    // Note: Admin SDK will bypass this and still work
+    match /vault/{vaultId} {
+      allow read, write: if isOwner(resource.data.userId);
+    }
+
+    // Secure Notes - Users can manage their own notes
+    match /notes/{noteId} {
+      allow read, write: if isOwner(resource.data.userId);
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
