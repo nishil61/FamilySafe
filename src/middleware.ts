@@ -36,7 +36,8 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https: data: blob:",
     "font-src 'self' https:",
-    "connect-src 'self' blob: https://firebase.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.firestore.googleapis.com https://oauth2.googleapis.com https://analytics.google.com",
+    // Allow all Firebase services and Google APIs for Firestore WebChannel, Realtime DB, Auth, etc.
+    "connect-src 'self' blob: https://firebase.googleapis.com https://firestore.googleapis.com https://*.firestore.googleapis.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://oauth2.googleapis.com https://analytics.google.com https://ip-api.com wss://*.firebaseio.com wss://*.firestore.googleapis.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
