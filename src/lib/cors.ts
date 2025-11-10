@@ -20,9 +20,24 @@ const ALLOWED_ORIGINS = [
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+// Check if origin is allowed (supports wildcard matching)
+function isOriginAllowed(origin: string): boolean {
+  // Exact match
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    return true;
+  }
+
+  // Wildcard match for vercel.app
+  if (origin.endsWith('.vercel.app') || origin === 'https://vercel.app') {
+    return true;
+  }
+
+  return false;
+}
+
 export function getCORSHeaders(request: NextRequest) {
   const origin = request.headers.get('origin') || '';
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowedOrigin = isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
@@ -44,7 +59,7 @@ export function handleCORS(request: NextRequest) {
 
   // Validate origin for non-preflight requests
   const origin = request.headers.get('origin');
-  if (origin && !ALLOWED_ORIGINS.includes(origin) && !isDevelopment) {
+  if (origin && !isOriginAllowed(origin) && !isDevelopment) {
     return new NextResponse(
       JSON.stringify({ error: 'CORS policy violation' }),
       { status: 403, headers: { 'Content-Type': 'application/json' } }

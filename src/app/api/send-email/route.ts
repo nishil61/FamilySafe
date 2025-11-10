@@ -76,40 +76,16 @@ export async function POST(request: NextRequest) {
     const pass = process.env.EMAIL_SERVER_PASSWORD;
     const from = process.env.EMAIL_FROM;
 
-    // Debug: Log if credentials are missing
-    if (!user) {
-      console.error('EMAIL_SERVER_USER is not configured');
-      throw new Error('EMAIL_SERVER_USER not configured');
+    if (!user || !pass || !from) {
+      throw new Error('Email server credentials are not configured in environment variables.');
     }
-    if (!pass) {
-      console.error('EMAIL_SERVER_PASSWORD is not configured');
-      throw new Error('EMAIL_SERVER_PASSWORD not configured');
-    }
-    if (!from) {
-      console.error('EMAIL_FROM is not configured');
-      throw new Error('EMAIL_FROM not configured');
-    }
-
-    console.log('Creating email transporter for:', user);
 
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
       secure: true,
-      auth: { 
-        user, 
-        pass 
-      },
+      auth: { user, pass },
     });
-
-    // Test connection
-    try {
-      await transporter.verify();
-      console.log('SMTP connection verified successfully');
-    } catch (verifyError: any) {
-      console.error('SMTP verification failed:', verifyError.message);
-      throw new Error(`SMTP verification failed: ${verifyError.message}`);
-    }
 
     const mailOptions = {
         from: `"FamilySafe" <${from}>`,
@@ -130,9 +106,7 @@ export async function POST(request: NextRequest) {
         `,
       };
 
-    console.log('Sending email to:', to);
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
+    await transporter.sendMail(mailOptions);
 
     let response = applyCORSHeaders(
       NextResponse.json({ success: true, message: 'Email sent successfully.' }),
@@ -140,18 +114,9 @@ export async function POST(request: NextRequest) {
     );
     return response;
   } catch (error: any) {
-    console.error('Send email error:', {
-      message: error.message,
-      code: error.code,
-      response: error.response,
-      stack: error.stack,
-    });
+    console.error('Send email error:', error);
     let response = applyCORSHeaders(
-      NextResponse.json({ 
-        success: false, 
-        message: `Failed to send email: ${error.message}`,
-        errorCode: error.code 
-      }, { status: 500 }),
+      NextResponse.json({ success: false, message: 'Failed to send email' }, { status: 500 }),
       request
     );
     return response;
