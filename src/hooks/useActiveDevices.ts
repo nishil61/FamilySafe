@@ -67,6 +67,17 @@ export function useActiveDevices() {
         createdAt: Timestamp.now(),
       };
 
+      // First, ensure the user document exists (create if not exists)
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      await setDoc(userDocRef, 
+        {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email || '',
+          lastLogin: Timestamp.now(),
+        },
+        { merge: true } // merge: true means it won't overwrite existing data
+      );
+
       // Store in Firestore under user's devices subcollection
       await setDoc(
         doc(db, 'users', auth.currentUser.uid, 'devices', deviceId),

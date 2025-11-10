@@ -16,13 +16,13 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
       
       // Allow devices subcollection for active device management
+      // Users can create, read, update, delete their own devices
       match /devices/{deviceId} {
-        allow read, write, delete: if isOwner(userId);
+        allow create, read, write, delete: if isOwner(userId);
       }
     }
 
     // Secure Vault - Users can manage their own vault items
-    // Note: Admin SDK will bypass this and still work
     match /vault/{vaultId} {
       allow read, write: if isOwner(resource.data.userId);
     }
