@@ -14,6 +14,11 @@ service cloud.firestore {
     // Users can manage their own profile data
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+      
+      // Allow devices subcollection for active device management
+      match /devices/{deviceId} {
+        allow read, write, delete: if isOwner(userId);
+      }
     }
 
     // Secure Vault - Users can manage their own vault items
@@ -33,4 +38,5 @@ service cloud.firestore {
     }
   }
 }
+
 
