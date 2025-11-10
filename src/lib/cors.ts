@@ -7,10 +7,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const ALLOWED_ORIGINS = [
-  process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002',
+  // Development
   'http://localhost:9002',
   'http://localhost:3000',
-  // Add production domain here
+  // Production - Vercel domains
+  process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002',
+  'https://familysafe-git-main-nishil61s-projects.vercel.app',
+  'https://familysafe-nishil61.vercel.app',
+  // Allow all *.vercel.app domains in production
+  ...(process.env.NODE_ENV === 'production' ? ['https://*.vercel.app'] : []),
 ];
 
 const isDevelopment = process.env.NODE_ENV === 'development';

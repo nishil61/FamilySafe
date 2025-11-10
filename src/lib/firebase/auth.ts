@@ -24,17 +24,45 @@ const generateAndStoreOtp = async (email: string) => {
 
   localStorage.setItem("otpData", JSON.stringify(otpData));
   
-  // Send email and handle errors properly
-  const response = await fetch('/api/send-email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to: email, otp }),
-  });
+  try {
+    // Send email and handle errors properly
+    // Use absolute URL for production compatibility
+    const apiUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/api/send-email`
+      : '/api/send-email';
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ to: email, otp }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    const error: any = new Error(errorData.message || 'Failed to send verification email');
-    error.status = response.status;
+    if (!response.ok) {
+      let errorMessage = 'Failed to send verification email';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        // If response is not JSON, use status text
+        errorMessage = `${response.status}: ${response.statusText}`;
+      }
+      const error: any = new Error(errorMessage);
+      error.status = response.status;
+      throw error;
+    }
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to send verification email');
+    }
+  } catch (error: any) {
+    // Clean up OTP data on error
+    localStorage.removeItem("otpData");
+    console.error('Email sending error:', error);
     throw error;
   }
 };
