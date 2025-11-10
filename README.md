@@ -1,4 +1,4 @@
-# 🏠 FamilySpace — Your Family's Digital Safe
+# 🏠 FamilySafe — Your Family's Digital Safe
 
 > **Stop juggling passwords, digging through folders, and forgetting where you saved that important document. FamilySpace is your family's single, secure digital space for everything that matters.**
 
